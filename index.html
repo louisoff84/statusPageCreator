@@ -2,57 +2,33 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Status Page</title>
+    <title>CraftPick Uptime - Status Pages</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
+<body class="bg-slate-50 text-slate-900">
+    <nav class="p-6 flex justify-between items-center max-w-6xl mx-auto">
+        <div class="font-bold text-2xl text-blue-600">CraftPick Uptime</div>
+        <div class="space-x-4">
+            <a href="login.html" class="text-slate-600 hover:text-blue-600 font-medium">Connexion</a>
+            <a href="login.html" class="bg-blue-600 text-white px-5 py-2 rounded-full font-bold hover:bg-blue-700 transition">Essayer gratuitement</a>
+        </div>
+    </nav>
 
-    <div id="content" class="max-w-2xl w-full hidden">
-        <h1 id="title" class="text-4xl font-black text-slate-800 text-center mb-8"></h1>
-        
-        <div id="status-card" class="bg-white p-10 rounded-3xl shadow-2xl border-t-8 transition-all duration-500">
-            <div class="flex justify-between items-center">
-                <div>
-                    <h2 id="status-text" class="text-2xl font-bold"></h2>
-                    <p class="text-slate-500 text-sm mt-1">Vérifié automatiquement par CraftPick</p>
-                </div>
-                <div id="indicator" class="h-6 w-6 rounded-full animate-pulse shadow-lg"></div>
+    <header class="max-w-4xl mx-auto text-center py-20 px-4">
+        <h1 class="text-5xl md:text-6xl font-black mb-6 leading-tight">La page de status de votre projet, <span class="text-blue-600">en 1 clic.</span></h1>
+        <p class="text-xl text-slate-500 mb-10">Informez vos utilisateurs en temps réel de l'état de vos serveurs et services avec une interface élégante et professionnelle.</p>
+        <div class="flex flex-col md:flex-row justify-center gap-4">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 w-64">
+                <div class="text-3xl mb-2">⚡</div>
+                <h3 class="font-bold">Ultra Rapide</h3>
+                <p class="text-sm text-slate-400">Générez une URL unique instantanément.</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 w-64">
+                <div class="text-3xl mb-2">🎨</div>
+                <h3 class="font-bold">Personnalisable</h3>
+                <p class="text-sm text-slate-400">Modifiez le design et les statuts à volonté.</p>
             </div>
         </div>
-        <p class="text-center mt-8 text-slate-400 text-xs">Propulsé par StatusPageCreator</p>
-    </div>
-
-    <script>
-        const params = new URLSearchParams(window.location.search);
-        const pageId = params.get('p');
-        const pages = JSON.parse(localStorage.getItem('uptime_pages')) || {};
-
-        if (pageId && pages[pageId]) {
-            const data = pages[pageId];
-            document.getElementById('content').classList.remove('hidden');
-            document.getElementById('title').textContent = data.title;
-            document.title = "Status: " + data.title;
-
-            const config = {
-                emerald: { text: "Opérationnel", border: "border-emerald-500", bg: "bg-emerald-500" },
-                amber: { text: "Performance Réduite", border: "border-amber-500", bg: "bg-amber-500" },
-                rose: { text: "Interruption de Service", border: "border-rose-500", bg: "bg-rose-500" }
-            };
-
-            const theme = config[data.status] || config.emerald;
-            
-            const card = document.getElementById('status-card');
-            const ind = document.getElementById('indicator');
-            const txt = document.getElementById('status-text');
-
-            card.classList.add(theme.border);
-            ind.classList.add(theme.bg);
-            txt.textContent = theme.text;
-            txt.classList.add(`text-${data.status}-700`);
-
-        } else {
-            document.body.innerHTML = "<div class='text-center'><h1 class='text-2xl font-bold text-slate-400'>Page de statut non trouvée</h1><a href='login.html' class='text-blue-500 underline text-sm'>Aller au Dashboard</a></div>";
-        }
-    </script>
+    </header>
 </body>
 </html>
