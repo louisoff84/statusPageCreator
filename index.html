@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uptime Status Creator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .status-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: .5; transform: scale(1.2); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex items-center justify-center p-4">
+
+    <div id="creator-ui" class="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl border border-slate-200">
+        <h1 class="text-2xl font-bold mb-2 text-blue-600">StatusPage Creator</h1>
+        <p class="text-slate-500 mb-6 text-sm">Générez une page de monitoring personnalisée instantanément.</p>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Nom de l'entreprise</label>
+                <input type="text" id="input-company" placeholder="Ex: CraftPick" class="w-full p-3 bg-slate-100 border-none rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Nom du service / page</label>
+                <input type="text" id="input-page" placeholder="Ex: Serveur-Survie" class="w-full p-3 bg-slate-100 border-none rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            <button onclick="generateLink()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition">Générer la page</button>
+        </div>
+
+        <div id="result-link" class="mt-6 hidden">
+            <p class="text-xs text-slate-400 mb-2">Votre lien personnalisé :</p>
+            <div class="p-3 bg-blue-50 border border-blue-100 rounded break-all text-blue-700 text-sm font-mono" id="generated-url"></div>
+        </div>
+    </div>
+
+    <div id="status-ui" class="hidden max-w-2xl w-full">
+        <div class="text-center mb-8">
+            <p id="display-company" class="text-blue-600 font-black uppercase tracking-widest text-sm mb-2"></p>
+            <h1 id="display-page" class="text-4xl font-bold text-slate-800"></h1>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100">
+            <div class="p-8 flex items-center justify-between bg-emerald-50 border-b border-emerald-100">
+                <div>
+                    <h2 class="text-emerald-800 text-xl font-bold">Système Opérationnel</h2>
+                    <p class="text-emerald-600 text-sm">Tous les services fonctionnent normalement.</p>
+                </div>
+                <div class="h-4 w-4 bg-emerald-500 rounded-full status-pulse shadow-[0_0_15px_rgba(16,185,129,0.5)]"></div>
+            </div>
+
+            <div class="p-8 space-y-6">
+                <div class="flex justify-between items-center">
+                    <span class="font-medium text-slate-700">Disponibilité (24h)</span>
+                    <span class="text-emerald-500 font-bold">100.0%</span>
+                </div>
+                <div class="flex gap-1 h-8">
+                    <script>
+                        for(let i=0; i<30; i++) document.write(`<div class="flex-1 bg-emerald-400 rounded-sm opacity-${Math.random() > 0.9 ? '40' : '100'}"></div>`);
+                    </script>
+                </div>
+                <div class="flex justify-between text-xs text-slate-400 font-medium">
+                    <span>Il y a 30 jours</span>
+                    <span>Aujourd'hui</span>
+                </div>
+            </div>
+        </div>
+        
+        <p class="text-center mt-8 text-slate-400 text-sm">Dernière vérification : <span id="current-time"></span></p>
+    </div>
+
+    <script>
+        // Logique de routage simple
+        const params = new URLSearchParams(window.location.search);
+        const company = params.get('company');
+        const page = params.get('page');
+
+        if (company && page) {
+            // Afficher le mode Status
+            document.getElementById('creator-ui').classList.add('hidden');
+            document.getElementById('status-ui').classList.remove('hidden');
+            
+            document.getElementById('display-company').textContent = company;
+            document.getElementById('display-page').textContent = page.replace(/-/g, ' ');
+            document.title = `Status - ${company}`;
+            document.getElementById('current-time').textContent = new Date().toLocaleTimeString();
+        }
+
+        // Fonction pour générer le lien
+        function generateLink() {
+            const co = document.getElementById('input-company').value.trim();
+            const pg = document.getElementById('input-page').value.trim();
+            
+            if(co && pg) {
+                const baseUrl = window.location.origin + window.location.pathname;
+                const finalUrl = `${baseUrl}?company=${encodeURIComponent(co)}&page=${encodeURIComponent(pg)}`;
+                
+                document.getElementById('result-link').classList.remove('hidden');
+                document.getElementById('generated-url').textContent = finalUrl;
+            } else {
+                alert("Veuillez remplir les deux champs.");
+            }
+        }
+    </script>
+</body>
+</html>
