@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Status Page - CraftPick</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
+
+    <div id="content" class="max-w-2xl w-full hidden">
+        <div class="text-center mb-10">
+            <h1 id="title" class="text-4xl font-black text-slate-800 mb-2"></h1>
+            <p class="text-slate-400 font-medium">État des services en temps réel</p>
+        </div>
+        
+        <div id="status-card" class="bg-white p-10 rounded-[2.5rem] shadow-2xl border-t-[12px] transition-all duration-700">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="text-center md:text-left">
+                    <h2 id="status-text" class="text-3xl font-bold mb-1"></h2>
+                    <p id="last-update" class="text-slate-400 text-sm italic"></p>
+                </div>
+                <div id="indicator" class="h-12 w-12 rounded-full animate-pulse shadow-inner"></div>
+            </div>
+        </div>
+
+        <div class="mt-12 flex justify-center gap-4 text-slate-300 text-xs font-bold uppercase tracking-widest">
+            <span>Powererd by CraftPick</span>
+            <span>&bull;</span>
+            <a href="index.html" class="hover:text-blue-500 transition">Créer ma page</a>
+        </div>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const pageId = params.get('p');
+        const pages = JSON.parse(localStorage.getItem('uptime_pages')) || {};
+
+        if (pageId && pages[pageId]) {
+            const data = pages[pageId];
+            document.getElementById('content').classList.remove('hidden');
+            document.getElementById('title').textContent = data.title;
+            document.getElementById('last-update').textContent = "Mis à jour : " + (data.updatedAt || "Récemment");
+
+            const config = {
+                emerald: { text: "Opérationnel", border: "border-emerald-500", bg: "bg-emerald-500", shadow: "0 0 20px #10b981" },
+                amber: { text: "Performance Réduite", border: "border-amber-500", bg: "bg-amber-500", shadow: "0 0 20px #f59e0b" },
+                rose: { text: "Interruption Totale", border: "border-rose-500", bg: "bg-rose-500", shadow: "0 0 20px #f43f5e" }
+            };
+
+            const theme = config[data.status] || config.emerald;
+            const card = document.getElementById('status-card');
+            const ind = document.getElementById('indicator');
+            const txt = document.getElementById('status-text');
+
+            card.classList.add(theme.border);
+            ind.classList.add(theme.bg);
+            ind.style.boxShadow = theme.shadow;
+            txt.textContent = theme.text;
+            txt.style.color = theme.bg.replace('bg-', 'text-');
+        } else {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
