@@ -3,98 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uptime - Login / Register</title>
+    <title>Connexion - CraftPick Uptime</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-100 min-h-screen flex items-center justify-center p-4">
+<body class="bg-slate-50 min-h-screen flex flex-col items-center justify-center p-4">
 
-    <div class="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl border border-slate-200">
+    <a href="index.html" class="mb-8 flex items-center gap-2 text-blue-600 font-bold text-xl">
+        <span class="text-2xl">⚡</span> CraftPick Uptime
+    </a>
+
+    <div class="max-w-md w-full bg-white p-8 rounded-3xl shadow-xl border border-slate-100">
         
-        <div class="flex border-b mb-6">
-            <button id="tab-login" onclick="switchTab('login')" class="flex-1 py-2 font-bold text-blue-600 border-b-2 border-blue-600">Connexion</button>
-            <button id="tab-register" onclick="switchTab('register')" class="flex-1 py-2 font-bold text-slate-400 border-b-2 border-transparent">Inscription</button>
+        <div class="flex bg-slate-100 p-1 rounded-xl mb-8">
+            <button id="tab-login" onclick="switchTab('login')" class="flex-1 py-2 rounded-lg font-bold text-sm transition-all bg-white shadow-sm text-blue-600">
+                Connexion
+            </button>
+            <button id="tab-register" onclick="switchTab('register')" class="flex-1 py-2 rounded-lg font-bold text-sm transition-all text-slate-500">
+                Inscription
+            </button>
         </div>
 
-        <h1 id="form-title" class="text-xl font-bold mb-6 text-slate-800">Ravi de vous revoir</h1>
+        <h2 id="title" class="text-2xl font-bold text-slate-800 mb-2 text-center">Ravi de vous revoir</h2>
+        <p id="subtitle" class="text-slate-500 text-sm text-center mb-8">Entrez vos identifiants pour gérer vos pages.</p>
 
-        <form id="auth-form" onsubmit="handleAuth(event)" class="space-y-4">
+        <form onsubmit="handleSubmit(event)" class="space-y-5">
             <div>
-                <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Email</label>
-                <input type="email" id="email" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
+                <label class="block text-xs font-black uppercase text-slate-400 mb-2 ml-1">Adresse Email</label>
+                <input type="email" id="email" required placeholder="nom@exemple.com" 
+                    class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all">
             </div>
             <div>
-                <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Mot de passe</label>
-                <input type="password" id="password" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
+                <label class="block text-xs font-black uppercase text-slate-400 mb-2 ml-1">Mot de passe</label>
+                <input type="password" id="password" required placeholder="••••••••" 
+                    class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all">
             </div>
             
-            <button type="submit" id="submit-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition shadow-lg shadow-blue-200">
+            <button type="submit" id="btn-text" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 mt-2">
                 Se connecter
             </button>
         </form>
 
-        <p id="msg" class="mt-4 text-center text-sm font-medium"></p>
+        <div id="error-msg" class="mt-4 text-center text-sm font-medium text-red-500 hidden"></div>
     </div>
 
-    <script>
-        let currentMode = 'login';
+    <footer class="mt-8 text-slate-400 text-xs text-center">
+        &copy; 2025 CraftPick Systems. <br> Sécurisé par chiffrement local.
+    </footer>
 
-        // Changer entre Login et Register
-        function switchTab(mode) {
-            currentMode = mode;
+    <script>
+        let mode = 'login';
+
+        function switchTab(newMode) {
+            mode = newMode;
             const isLogin = mode === 'login';
             
-            // UI Update
-            document.getElementById('form-title').textContent = isLogin ? 'Ravi de vous revoir' : 'Créer un compte';
-            document.getElementById('submit-btn').textContent = isLogin ? 'Se connecter' : 'S\'inscrire';
+            // UI Toggle
+            document.getElementById('title').textContent = isLogin ? 'Ravi de vous revoir' : 'Créer un compte';
+            document.getElementById('subtitle').textContent = isLogin ? 'Entrez vos identifiants pour gérer vos pages.' : 'Commencez à monitorer vos services dès maintenant.';
+            document.getElementById('btn-text').textContent = isLogin ? 'Se connecter' : 'Créer mon compte';
             
-            document.getElementById('tab-login').className = isLogin ? 'flex-1 py-2 font-bold text-blue-600 border-b-2 border-blue-600' : 'flex-1 py-2 font-bold text-slate-400 border-b-2 border-transparent';
-            document.getElementById('tab-register').className = !isLogin ? 'flex-1 py-2 font-bold text-blue-600 border-b-2 border-blue-600' : 'flex-1 py-2 font-bold text-slate-400 border-b-2 border-transparent';
+            // Animation des onglets
+            document.getElementById('tab-login').className = isLogin 
+                ? "flex-1 py-2 rounded-lg font-bold text-sm transition-all bg-white shadow-sm text-blue-600" 
+                : "flex-1 py-2 rounded-lg font-bold text-sm transition-all text-slate-500";
             
-            document.getElementById('msg').textContent = '';
+            document.getElementById('tab-register').className = !isLogin 
+                ? "flex-1 py-2 rounded-lg font-bold text-sm transition-all bg-white shadow-sm text-blue-600" 
+                : "flex-1 py-2 rounded-lg font-bold text-sm transition-all text-slate-500";
+            
+            document.getElementById('error-msg').classList.add('hidden');
         }
 
-        function handleAuth(e) {
+        function handleSubmit(e) {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const msg = document.getElementById('msg');
+            const errorElement = document.getElementById('error-msg');
+            
+            let users = JSON.parse(localStorage.getItem('uptime_users')) || [];
 
-            // Récupérer les utilisateurs existants
-            let users = JSON.parse(localStorage.getItem('users')) || [];
-
-            if (currentMode === 'register') {
-                // S'INSCRIRE
-                const exists = users.find(u => u.email === email);
-                if (exists) {
-                    msg.className = "mt-4 text-center text-sm font-medium text-red-500";
-                    msg.textContent = "Cet email est déjà utilisé.";
+            if (mode === 'register') {
+                // INSCRIPTION
+                if (users.find(u => u.email === email)) {
+                    showError("Cet email est déjà enregistré.");
                     return;
                 }
-
                 users.push({ email, password });
-                localStorage.setItem('users', JSON.stringify(users));
-                
-                msg.className = "mt-4 text-center text-sm font-medium text-green-500";
-                msg.textContent = "Compte créé ! Connectez-vous maintenant.";
+                localStorage.setItem('uptime_users', JSON.stringify(users));
+                showSuccess("Compte créé ! Connectez-vous.");
                 switchTab('login');
-
             } else {
-                // SE CONNECTER
+                // CONNEXION
                 const user = users.find(u => u.email === email && u.password === password);
                 if (user) {
-                    msg.className = "mt-4 text-center text-sm font-medium text-green-500";
-                    msg.textContent = "Connexion réussie... redirection";
-                    
-                    // Stocker la session et rediriger vers l'index
                     sessionStorage.setItem('isLoggedIn', 'true');
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 1000);
+                    sessionStorage.setItem('userEmail', email); // Pour afficher l'user plus tard
+                    window.location.href = 'dashboard.html';
                 } else {
-                    msg.className = "mt-4 text-center text-sm font-medium text-red-500";
-                    msg.textContent = "Email ou mot de passe incorrect.";
+                    showError("Identifiants incorrects.");
                 }
             }
+        }
+
+        function showError(text) {
+            const err = document.getElementById('error-msg');
+            err.textContent = text;
+            err.classList.remove('hidden', 'text-green-500');
+            err.classList.add('text-red-500');
+        }
+
+        function showSuccess(text) {
+            const err = document.getElementById('error-msg');
+            err.textContent = text;
+            err.classList.remove('hidden', 'text-red-500');
+            err.classList.add('text-green-500');
         }
     </script>
 </body>
