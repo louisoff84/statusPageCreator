@@ -2,130 +2,56 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uptime - StatusPage Creator</title>
+    <title>Status Page</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .status-pulse {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: .5; transform: scale(1.2); }
-        }
-    </style>
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen flex items-center justify-center p-4">
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
 
-    <div id="creator-ui" class="hidden max-w-md w-full bg-white p-8 rounded-2xl shadow-xl border border-slate-200">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold text-blue-600">Creator</h1>
-            <button onclick="logout()" class="text-xs font-bold text-red-500 hover:underline uppercase">Déconnexion</button>
-        </div>
+    <div id="content" class="max-w-2xl w-full hidden">
+        <h1 id="title" class="text-4xl font-black text-slate-800 text-center mb-8"></h1>
         
-        <p class="text-slate-500 mb-6 text-sm">Créez un lien de monitoring pour votre entreprise.</p>
-        
-        <div class="space-y-4">
-            <div>
-                <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Nom de l'entreprise</label>
-                <input type="text" id="input-company" placeholder="Ex: CraftPick" class="w-full p-3 bg-slate-100 border-none rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-            </div>
-            <div>
-                <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Nom de la page</label>
-                <input type="text" id="input-page" placeholder="Ex: Serveur-Privé" class="w-full p-3 bg-slate-100 border-none rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-            </div>
-            <button onclick="generateLink()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition">Générer le lien public</button>
-        </div>
-
-        <div id="result-link" class="mt-6 hidden">
-            <p class="text-xs text-slate-400 mb-2">Lien à partager :</p>
-            <div class="p-3 bg-blue-50 border border-blue-100 rounded break-all text-blue-700 text-sm font-mono" id="generated-url"></div>
-        </div>
-    </div>
-
-    <div id="status-ui" class="hidden max-w-2xl w-full">
-        <div class="text-center mb-8">
-            <p id="display-company" class="text-blue-600 font-black uppercase tracking-widest text-sm mb-2"></p>
-            <h1 id="display-page" class="text-4xl font-bold text-slate-800"></h1>
-        </div>
-
-        <div class="bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100">
-            <div class="p-8 flex items-center justify-between bg-emerald-50 border-b border-emerald-100">
+        <div id="status-card" class="bg-white p-10 rounded-3xl shadow-2xl border-t-8 transition-all duration-500">
+            <div class="flex justify-between items-center">
                 <div>
-                    <h2 class="text-emerald-800 text-xl font-bold">Système Opérationnel</h2>
-                    <p class="text-emerald-600 text-sm">Tous les services fonctionnent normalement.</p>
+                    <h2 id="status-text" class="text-2xl font-bold"></h2>
+                    <p class="text-slate-500 text-sm mt-1">Vérifié automatiquement par CraftPick</p>
                 </div>
-                <div class="h-4 w-4 bg-emerald-500 rounded-full status-pulse shadow-[0_0_15px_rgba(16,185,129,0.5)]"></div>
-            </div>
-
-            <div class="p-8 space-y-6">
-                <div class="flex justify-between items-center">
-                    <span class="font-medium text-slate-700">Disponibilité (30j)</span>
-                    <span class="text-emerald-500 font-bold">100.0%</span>
-                </div>
-                <div class="flex gap-1 h-8">
-                    <script>
-                        for(let i=0; i<40; i++) {
-                            const opacity = Math.random() > 0.05 ? 'bg-emerald-400' : 'bg-emerald-200';
-                            document.write(`<div class="flex-1 ${opacity} rounded-sm"></div>`);
-                        }
-                    </script>
-                </div>
-                <div class="flex justify-between text-xs text-slate-400 font-medium">
-                    <span>Il y a 30 jours</span>
-                    <span>Aujourd'hui</span>
-                </div>
+                <div id="indicator" class="h-6 w-6 rounded-full animate-pulse shadow-lg"></div>
             </div>
         </div>
-        <p class="text-center mt-8 text-slate-400 text-sm italic underline cursor-pointer" onclick="window.location.href='index.html'">Créer ma propre page de status</p>
+        <p class="text-center mt-8 text-slate-400 text-xs">Propulsé par StatusPageCreator</p>
     </div>
 
     <script>
-        // --- LOGIQUE DE ROUTAGE ET SÉCURITÉ ---
         const params = new URLSearchParams(window.location.search);
-        const company = params.get('company');
-        const page = params.get('page');
+        const pageId = params.get('p');
+        const pages = JSON.parse(localStorage.getItem('uptime_pages')) || {};
 
-        const isPublicPage = (company && page);
-        const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+        if (pageId && pages[pageId]) {
+            const data = pages[pageId];
+            document.getElementById('content').classList.remove('hidden');
+            document.getElementById('title').textContent = data.title;
+            document.title = "Status: " + data.title;
 
-        if (isPublicPage) {
-            // MODE PUBLIC : On affiche la page de status sans demander de login
-            document.getElementById('status-ui').classList.remove('hidden');
-            document.getElementById('display-company').textContent = company;
-            document.getElementById('display-page').textContent = page.replace(/-/g, ' ');
-            document.title = `Status - ${company}`;
-        } 
-        else if (isLoggedIn) {
-            // MODE CONNECTÉ : On affiche le générateur
-            document.getElementById('creator-ui').classList.remove('hidden');
-        } 
-        else {
-            // MODE NON CONNECTÉ : Redirection vers login
-            window.location.href = 'login.html';
-        }
+            const config = {
+                emerald: { text: "Opérationnel", border: "border-emerald-500", bg: "bg-emerald-500" },
+                amber: { text: "Performance Réduite", border: "border-amber-500", bg: "bg-amber-500" },
+                rose: { text: "Interruption de Service", border: "border-rose-500", bg: "bg-rose-500" }
+            };
 
-        // --- FONCTIONS ---
-        function generateLink() {
-            const co = document.getElementById('input-company').value.trim();
-            const pg = document.getElementById('input-page').value.trim();
+            const theme = config[data.status] || config.emerald;
             
-            if(co && pg) {
-                const baseUrl = window.location.origin + window.location.pathname;
-                // On remplace les espaces par des tirets pour l'URL
-                const cleanPage = pg.replace(/\s+/g, '-');
-                const finalUrl = `${baseUrl}?company=${encodeURIComponent(co)}&page=${encodeURIComponent(cleanPage)}`;
-                
-                document.getElementById('result-link').classList.remove('hidden');
-                document.getElementById('generated-url').textContent = finalUrl;
-            } else {
-                alert("Remplis tous les champs !");
-            }
-        }
+            const card = document.getElementById('status-card');
+            const ind = document.getElementById('indicator');
+            const txt = document.getElementById('status-text');
 
-        function logout() {
-            sessionStorage.removeItem('isLoggedIn');
-            window.location.href = 'login.html';
+            card.classList.add(theme.border);
+            ind.classList.add(theme.bg);
+            txt.textContent = theme.text;
+            txt.classList.add(`text-${data.status}-700`);
+
+        } else {
+            document.body.innerHTML = "<div class='text-center'><h1 class='text-2xl font-bold text-slate-400'>Page de statut non trouvée</h1><a href='login.html' class='text-blue-500 underline text-sm'>Aller au Dashboard</a></div>";
         }
     </script>
 </body>
