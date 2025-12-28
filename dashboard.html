@@ -2,82 +2,98 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard - CraftPick Uptime</title>
+    <title>Dashboard - CraftPick</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-100 p-6">
-    <div class="max-w-4xl mx-auto">
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-2xl font-bold text-slate-800">Gestionnaire de Status</h1>
-            <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded shadow">Déconnexion</button>
-        </div>
+<body class="bg-slate-50 min-h-screen">
 
-        <div class="grid md:grid-cols-2 gap-6">
-            <div class="bg-white p-6 rounded-xl shadow">
-                <h2 class="text-lg font-bold mb-4 border-b pb-2">Éditer / Créer une page</h2>
-                <div class="space-y-4">
-                    <input type="text" id="p-id" placeholder="ID (ex: survie-1)" class="w-full p-2 border rounded">
-                    <input type="text" id="p-title" placeholder="Titre de la page" class="w-full p-2 border rounded">
-                    <select id="p-status" class="w-full p-2 border rounded">
-                        <option value="emerald">Opérationnel (Vert)</option>
-                        <option value="amber">Performance réduite (Orange)</option>
-                        <option value="rose">Hors-ligne (Rouge)</option>
-                    </select>
-                    <button onclick="savePage()" class="w-full bg-blue-600 text-white py-3 rounded font-bold hover:bg-blue-700">Enregistrer les modifications</button>
-                </div>
+    <nav class="bg-white border-b border-slate-200 px-6 py-4">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2 font-black text-blue-600 text-xl">
+                <span>⚡</span> Dashboard
             </div>
-
-            <div class="bg-white p-6 rounded-xl shadow">
-                <h2 class="text-lg font-bold mb-4 border-b pb-2">Mes Pages actives</h2>
-                <div id="pages-list" class="space-y-3"></div>
+            <div class="flex items-center gap-4">
+                <span id="user-display" class="text-sm text-slate-500 font-medium"></span>
+                <button onclick="logout()" class="text-red-500 text-sm font-bold hover:underline">Quitter</button>
             </div>
         </div>
-    </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto p-6 md:p-10">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-800">Mes Status Pages</h1>
+                <p class="text-slate-500">Gérez l'état de vos services en temps réel.</p>
+            </div>
+            <a href="create.html" class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200">
+                + Nouvelle Page
+            </a>
+        </div>
+
+        <div id="pages-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+    </main>
 
     <script>
         if (sessionStorage.getItem('isLoggedIn') !== 'true') window.location.href = 'login.html';
+        document.getElementById('user-display').textContent = sessionStorage.getItem('userEmail');
 
-        function savePage() {
-            const id = document.getElementById('p-id').value.trim().toLowerCase().replace(/\s+/g, '-');
-            const title = document.getElementById('p-title').value;
-            const status = document.getElementById('p-status').value;
-
-            if(!id || !title) return alert("Champs vides !");
-
+        function renderPages() {
+            const container = document.getElementById('pages-container');
             const pages = JSON.parse(localStorage.getItem('uptime_pages')) || {};
-            pages[id] = { title, status, lastUpdate: new Date().toLocaleString() };
-            localStorage.setItem('uptime_pages', JSON.stringify(pages));
-            
-            renderList();
-            alert("Page mise à jour !");
-        }
+            container.innerHTML = '';
 
-        function renderList() {
-            const list = document.getElementById('pages-list');
-            const pages = JSON.parse(localStorage.getItem('uptime_pages')) || {};
-            list.innerHTML = '';
+            if (Object.keys(pages).length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-20 bg-white rounded-3xl border-2 border-dashed border-slate-200 text-slate-400 font-medium">Vous n'avez pas encore de page. Cliquez sur "Nouvelle Page" pour commencer.</div>`;
+                return;
+            }
 
             for (const [id, data] of Object.entries(pages)) {
-                list.innerHTML += `
-                    <div class="p-3 bg-slate-50 border rounded-lg flex justify-between items-center">
-                        <div>
-                            <p class="font-bold text-slate-700">${data.title}</p>
-                            <a href="index.html?p=${id}" target="_blank" class="text-blue-500 text-xs underline">Voir la page publique</a>
+                const url = `status.html?p=${id}`;
+                container.innerHTML += `
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="h-3 w-3 rounded-full bg-${data.status}-500 shadow-[0_0_10px_rgba(0,0,0,0.1)]"></div>
+                            <button onclick="deletePage('${id}')" class="text-slate-300 hover:text-red-500 transition">✖</button>
                         </div>
-                        <button onclick="deletePage('${id}')" class="text-red-400 hover:text-red-600 font-bold">✖</button>
-                    </div>`;
+                        <h3 class="text-xl font-bold text-slate-800 mb-1">${data.title}</h3>
+                        <p class="text-xs text-slate-400 font-mono mb-4 underline">${id}</p>
+                        
+                        <div class="flex gap-2">
+                            <a href="${url}" target="_blank" class="flex-1 text-center bg-slate-100 text-slate-600 py-2 rounded-xl text-sm font-bold hover:bg-slate-200 transition">Voir</a>
+                            <button onclick="quickUpdate('${id}')" class="flex-1 bg-blue-50 text-blue-600 py-2 rounded-xl text-sm font-bold hover:bg-blue-100 transition">Modifier</button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function quickUpdate(id) {
+            const pages = JSON.parse(localStorage.getItem('uptime_pages'));
+            const newStatus = prompt("Nouveau statut : emerald (vert), amber (orange), rose (rouge)", pages[id].status);
+            
+            if (['emerald', 'amber', 'rose'].includes(newStatus)) {
+                pages[id].status = newStatus;
+                pages[id].updatedAt = new Date().toLocaleString('fr-FR');
+                localStorage.setItem('uptime_pages', JSON.stringify(pages));
+                renderPages();
+            } else if (newStatus !== null) {
+                alert("Valeur invalide.");
             }
         }
 
         function deletePage(id) {
-            const pages = JSON.parse(localStorage.getItem('uptime_pages')) || {};
-            delete pages[id];
-            localStorage.setItem('uptime_pages', JSON.stringify(pages));
-            renderList();
+            if(confirm("Supprimer définitivement cette page ?")) {
+                const pages = JSON.parse(localStorage.getItem('uptime_pages'));
+                delete pages[id];
+                localStorage.setItem('uptime_pages', JSON.stringify(pages));
+                renderPages();
+            }
         }
 
         function logout() { sessionStorage.clear(); window.location.href = 'login.html'; }
-        renderList();
+        
+        renderPages();
     </script>
 </body>
 </html>
